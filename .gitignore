@@ -4,5 +4,9 @@
 bin/
 vendor/
 temp/
+*.pid
 
 *.temp
+coverage.html
+
+*_mocks
