@@ -9,37 +9,52 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"time"
 
 	"golang.org/x/sync/errgroup"
+
+	"github.com/milQA/tzstat/pkg/grsdown"
 )
 
 var (
+	job          string
 	rps          int
 	clientsCount int
 )
 
 func main() {
-	flag.IntVar(&rps, "rps", 300, "rps")
-	flag.IntVar(&clientsCount, "clients", 2, "clients count")
+	flag.StringVar(&job, "job", "get", "'get' or 'post' job")
+	flag.IntVar(&rps, "rps", 50, "rps for client")
+	flag.IntVar(&clientsCount, "clients", 10, "clients count")
 
 	flag.Parse()
 
-	if err := run(context.Background()); err != nil {
-		log.Println(err)
+	grsdown.Run(context.Background(), func(ctx context.Context) error {
+		switch job {
+		case "get", "post":
+		default:
+			log.Println("invalid job: use 'get' or 'post'")
 
-		os.Exit(1)
-	}
+			return fmt.Errorf("invalid job: use 'get' or 'post'")
+		}
 
-	os.Exit(0)
+		log.Println("start loader")
+
+		if err := run(ctx); err != nil {
+			log.Println(err)
+
+			return err
+		}
+
+		return nil
+	})
 }
 
 func run(ctx context.Context) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	for i := 0; i < clientsCount; i++ {
-		g.Go(startClient)
+		g.Go(startClient(ctx))
 	}
 
 	if err := g.Wait(); err != nil {
@@ -49,31 +64,49 @@ func run(ctx context.Context) error {
 	return nil
 }
 
-func startClient() error {
-	ch := make(chan struct{}, rps)
-	ticker := time.NewTicker(time.Second / time.Duration(rps))
-	defer ticker.Stop()
+func startClient(ctx context.Context) func() error {
+	return func() error {
+		ch := make(chan struct{}, rps)
+		ticker := time.NewTicker(time.Second / time.Duration(rps))
+		defer ticker.Stop()
 
-	go func() {
-		for range ticker.C {
-			ch <- struct{}{}
+		var f func()
+		switch job {
+		case "get":
+			f = func() {
+				to := rand.Int31()
+				callGet(
+					time.Now().Add(time.Duration(to)),
+					time.Now().Add(time.Duration(rand.Int31n(to))),
+				)
+			}
+		case "post":
+			f = func() {
+				to := rand.Int31()
+				callPost(
+					time.Now().Add(time.Duration(to)),
+					int64(rand.Int31n(1000)),
+				)
+			}
 		}
-	}()
 
-	for range ch {
-		to := rand.Int31()
-		go callGet(
-			time.Now().Add(time.Duration(to)),
-			time.Now().Add(time.Duration(rand.Int31n(to))),
-		)
+		go func() {
+			for range ticker.C {
+				ch <- struct{}{}
+			}
+		}()
 
-		//go callPost(
-		//	time.Now().Add(time.Duration(to)),
-		//	int64(rand.Int31n(to)),
-		//)
+		for range ch {
+			select {
+			case <-ch:
+				go f()
+			case <-ctx.Done():
+				return nil
+			}
+		}
+
+		return nil
 	}
-
-	return nil
 }
 
 type postArgs struct {
@@ -108,26 +141,8 @@ func callPost(date time.Time, value int64) error {
 	return nil
 }
 
-type getArgs struct {
-	DateFrom time.Time `json:"date_from"`
-	DateTo   time.Time `json:"date_to"`
-}
-
 func callGet(dateFrom, dateTo time.Time) error {
-	getArgs := getArgs{
-		DateFrom: dateFrom,
-		DateTo:   dateTo,
-	}
-
-	body := &bytes.Buffer{}
-	json.NewEncoder(body).Encode(&getArgs)
-
-	req, err := http.NewRequest(http.MethodGet, "http://localhost:8080/api/stat", body)
-	if err != nil {
-		return err
-	}
-
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := http.Get("http://localhost:8080/api/stat")
 	if err != nil {
 		return err
 	}
