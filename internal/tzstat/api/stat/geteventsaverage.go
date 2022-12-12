@@ -7,13 +7,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/milQA/tzstat/internal/tzstat/storage/statrepository"
 )
 
 func (a *ApiStat) GetEventsAverage() http.Handler {
 	type (
 		result struct {
-			Value int64 `json:"value"`
+			Value decimal.Decimal `json:"value"`
 		}
 	)
 

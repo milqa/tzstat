@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/milQA/tzstat/internal/tzstat/storage/statrepository"
 )
 
@@ -27,11 +29,11 @@ func (r *StatRepository) AddEvent(_ context.Context, datetime time.Time, value i
 	return nil
 }
 
-func (r *StatRepository) GetEventsAvr(_ context.Context, timeFrom, timeTo time.Time) (int64, error) {
+func (r *StatRepository) GetEventsAvr(_ context.Context, timeFrom, timeTo time.Time) (decimal.Decimal, error) {
 	data := r.storage.getEventsWithDatetime(timeFrom.Unix(), timeTo.Unix())
 
 	if len(data) == 0 {
-		return 0, statrepository.ErrEventsNotFound
+		return decimal.New(0, 0), statrepository.ErrEventsNotFound
 	}
 
 	var sum int64
@@ -39,5 +41,5 @@ func (r *StatRepository) GetEventsAvr(_ context.Context, timeFrom, timeTo time.T
 		sum += v.value
 	}
 
-	return sum / int64(len(data)), nil
+	return decimal.New(sum, 0).Div(decimal.New(int64(len(data)), 0)), nil
 }
