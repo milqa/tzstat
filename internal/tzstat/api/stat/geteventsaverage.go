@@ -9,27 +9,16 @@ import (
 
 func (a *ApiStat) GetEventsAverage() http.Handler {
 	type (
-		args struct {
-			DateFrom time.Time `json:"date_from"`
-			DateTo   time.Time `json:"date_to"`
-		}
-
 		result struct {
 			Value int64 `json:"value"`
 		}
 	)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var args args
-		if err := json.NewDecoder(r.Body).Decode(&args); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+		dateTo := time.Now()
+		dateFrom := dateTo.Add(time.Minute)
 
-			log.Printf("cannot parse body: %s", err)
-
-			return
-		}
-
-		average, err := a.storage.GetEventsAvr(r.Context(), args.DateFrom, args.DateTo)
+		average, err := a.storage.GetEventsAvr(r.Context(), dateFrom, dateTo)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 
