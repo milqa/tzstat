@@ -29,10 +29,10 @@ race: dep ## Run data race detector
 	@go test -race -short ${PKG_LIST}
 
 coverage: ## Generate global code coverage report
-	shell ./tools/coverage.sh;
+	sh ./tools/coverage.sh;
 
 coverhtml: ## Generate global code coverage report in HTML
-	shell ./tools/coverage.sh html;
+	sh ./tools/coverage.sh html;
 
 dep: ## Get the dependencies
 	@go get -v -d ./...

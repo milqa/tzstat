@@ -27,9 +27,7 @@ func main() {
 		})
 	})
 
-	r.Route("/debug", func(r chi.Router) {
-		r.Get("/metrics", m.Handler.ServeHTTP)
-	})
+	r.Get("/metrics", m.Handler.ServeHTTP)
 
 	log.Print("app started")
 

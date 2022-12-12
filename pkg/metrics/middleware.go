@@ -37,7 +37,6 @@ func (m *HttpMetrics) Middleware(handlerID string, inner http.Handler) http.Hand
 			code := strconv.Itoa(wi.statusCode)
 
 			m.ResponseTime.WithLabelValues(hid, r.Method, code).Observe(duration)
-			m.Requests.WithLabelValues(hid, r.Method, code).Inc()
 		}()
 
 		inner.ServeHTTP(wi, r)

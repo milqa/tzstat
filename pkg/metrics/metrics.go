@@ -24,8 +24,6 @@ func NewMetrics(app, version string) *Metrics {
 type HttpMetrics struct {
 	// ResponseTime is SummaryVec with labels handler, method, code.
 	ResponseTime *prometheus.HistogramVec
-	// Requests is CounterVec with labels handler, method, code.
-	Requests *prometheus.CounterVec
 }
 
 func NewHttpMetrics(app, version string) *HttpMetrics {
@@ -35,15 +33,6 @@ func NewHttpMetrics(app, version string) *HttpMetrics {
 			Subsystem: "http",
 			Name:      "request_duration_seconds",
 			Help:      "Response len",
-			ConstLabels: map[string]string{
-				"version": version,
-			},
-		}, []string{"handler", "method", "code"}),
-		Requests: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace: app,
-			Subsystem: "http",
-			Name:      "requests",
-			Help:      "Requests count",
 			ConstLabels: map[string]string{
 				"version": version,
 			},
