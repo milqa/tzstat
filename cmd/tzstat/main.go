@@ -29,7 +29,7 @@ func main() {
 
 	r.Get("/metrics", m.Handler.ServeHTTP)
 
-	log.Print("app started")
+	log.Printf("app %s started. version: %s", Application, Version)
 
 	http.ListenAndServe(":8080", r)
 }

@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+
+bin/
+vendor/
+temp/
+*.pid
+*.temp
+
+grafana/
+prometheus/
+
+coverage.html
+
+*_mocks
