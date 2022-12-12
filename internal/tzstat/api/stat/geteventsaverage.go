@@ -2,9 +2,12 @@ package stat
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/milQA/tzstat/internal/tzstat/storage/statrepository"
 )
 
 func (a *ApiStat) GetEventsAverage() http.Handler {
@@ -15,16 +18,22 @@ func (a *ApiStat) GetEventsAverage() http.Handler {
 	)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		dateTo := time.Now()
-		dateFrom := dateTo.Add(time.Minute)
+		argDateTo := r.URL.Query().Get("date_to")
+		dateTo, err := time.Parse(time.RFC3339Nano, argDateTo)
+		if err != nil {
+			dateTo = time.Now()
+		}
+
+		dateFrom := dateTo.Add(-time.Minute)
 
 		average, err := a.storage.GetEventsAvr(r.Context(), dateFrom, dateTo)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			if !errors.Is(err, statrepository.ErrEventsNotFound) {
+				w.WriteHeader(http.StatusInternalServerError)
+				log.Printf("cannot get events average from storage: %s", err)
 
-			log.Printf("cannot get events average from storage: %s", err)
-
-			return
+				return
+			}
 		}
 
 		result := result{Value: average}

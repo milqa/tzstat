@@ -235,6 +235,80 @@ func Test_storage_getEventsWithDatetime(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			name: "",
+			fields: fields{
+				mu: sync.RWMutex{},
+				data: []event{
+					{
+						datetime: 13,
+						value:    13,
+					},
+					{
+						datetime: 13,
+						value:    13,
+					},
+				},
+			},
+			args: args{
+				datetimeFrom: 12,
+				datetimeTo:   15,
+			},
+			want: []event{
+				{
+					datetime: 13,
+					value:    13,
+				},
+				{
+					datetime: 13,
+					value:    13,
+				},
+			},
+		},
+
+		{
+			name: "",
+			fields: fields{
+				mu: sync.RWMutex{},
+				data: []event{
+					{
+						datetime: 13,
+						value:    13,
+					},
+					{
+						datetime: 13,
+						value:    13,
+					},
+					{
+						datetime: 14,
+						value:    14,
+					},
+					{
+						datetime: 17,
+						value:    17,
+					},
+				},
+			},
+			args: args{
+				datetimeFrom: 12,
+				datetimeTo:   15,
+			},
+			want: []event{
+				{
+					datetime: 13,
+					value:    13,
+				},
+				{
+					datetime: 13,
+					value:    13,
+				},
+				{
+					datetime: 14,
+					value:    14,
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -28,6 +28,8 @@ func (s *storage) insert(datetime, value int64) {
 		datetime: datetime,
 		value:    value,
 	}
+
+	//fmt.Printf("insert: %d time(unix): %d idx: %d arr:%v\n", value, datetime, idx, s.data)
 }
 
 func (s *storage) getEventsWithDatetime(datetimeFrom, datetimeTo int64) []event {
@@ -41,5 +43,6 @@ func (s *storage) getEventsWithDatetime(datetimeFrom, datetimeTo int64) []event 
 
 	copy(result, s.data[firstIdx:lastIdx])
 
+	//fmt.Printf("select: from(unix): %d to(unix): %d arr: %v cut_arr:%v\n", datetimeFrom, datetimeTo, s.data, result)
 	return result
 }

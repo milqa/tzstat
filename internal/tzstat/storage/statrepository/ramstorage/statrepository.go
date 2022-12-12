@@ -2,7 +2,6 @@ package ramstorage
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -32,7 +31,7 @@ func (r *StatRepository) GetEventsAvr(_ context.Context, timeFrom, timeTo time.T
 	data := r.storage.getEventsWithDatetime(timeFrom.Unix(), timeTo.Unix())
 
 	if len(data) == 0 {
-		return 0, fmt.Errorf("cannot find events")
+		return 0, statrepository.ErrEventsNotFound
 	}
 
 	var sum int64
