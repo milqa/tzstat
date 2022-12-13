@@ -1,5 +1,5 @@
 * Для старта сервиса `docker-compose up`
-* Для старта loader-a `go run ./cmd/load/main.go -job get -rps 50 -clients 10`
+* Для старта loader-a `go run ./cmd/load/main.go -job post -rps 50 -clients 10`
   * job: может быть get или post
   * rps: количество запросов в секунду для одного клиента
   * clients: количество клиентов

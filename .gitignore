@@ -6,6 +6,9 @@ vendor/
 temp/
 *.pid
 
+*.db
+var
+
 *.temp
 coverage.html
 
